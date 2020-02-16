@@ -3,9 +3,10 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public Grid grid;
-    public Node nodePrefab;
-    public Connection connectionPrefab;
+    [SerializeField] private Grid grid;
+    [SerializeField] private Node nodePrefab;
+    [SerializeField] private Connection connectionPrefab;
+    [SerializeField] private Background background;
 
     private Node draggingNode;
     private GridElementsArray gridElements;
@@ -40,7 +41,13 @@ public class GameManager : MonoBehaviour
         }
 
         if (Input.GetMouseButtonUp(0) && draggingNode != null)
+        {
             StopDrag();
+
+            var won = CheckForWinGame();
+            if (won)
+                OnWinGame();
+        }
     }
 
     private void Drag()
@@ -114,5 +121,32 @@ public class GameManager : MonoBehaviour
     {
         draggingNode.CancelDrag();
         draggingNode = null;
+    }
+
+    private bool CheckForWinGame()
+    {
+        foreach (var element in gridElements.elements)
+        {
+            if (element is Connection)
+            {
+                var connection = (Connection)element;
+                if (!connection.Connected)
+                    Debug.Log("not connected", connection);
+                    return false;
+            }
+            else if (element is Node)
+            {
+                var node = (Node)element;
+                if (node.positions.Count <= node.maxPositions)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void OnWinGame()
+    {
+        background.UpdateColor();
     }
 }
