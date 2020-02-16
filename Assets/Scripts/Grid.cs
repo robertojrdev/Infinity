@@ -109,4 +109,9 @@ public class Grid : MonoBehaviour
         }
     }
 
+    public GridElementsArray GetGridElementsArray()
+    {
+        return new GridElementsArray(gridSize.x, gridSize.y);
+    }
+
 }
