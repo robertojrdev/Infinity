@@ -52,20 +52,26 @@ public class Grid : MonoBehaviour
 
     public Vector2 GetCellPosition(int x, int y)
     {
-        var(mapSize, bottomLeftPos) = GetGridDimensions();
+        var (mapSize, bottomLeftPos) = GetGridDimensions();
         var cellFullSize = cellsOffset + cellsSize;
         var position = new Vector2(cellFullSize * x, cellFullSize * y);
         position += bottomLeftPos;  //start from bottom
         position += Vector2.one * cellFullSize / 2; //center the cell
-        
+
         return position;
     }
 
     public int PositionToIndex(int x, int y)
     {
-        x %= gridSize.x;
-        y %= gridSize.y;
-        return x * gridSize.y + y;
+        return y * gridSize.x + x;
+    }
+
+    public (int, int) IndexToPosition(int i)
+    {
+        var y = (i / gridSize.x);
+        var x =  i - (y * gridSize.x);
+
+        return (x, y);
     }
 
     /// <summary>
