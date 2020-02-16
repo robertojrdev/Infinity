@@ -4,14 +4,16 @@ using UnityEngine;
 [RequireComponent(typeof(Line))]
 public class Node : MonoBehaviour
 {
-    public bool isDragging { get; private set; }
+    [Min(0)] public int maxPositions = 3;
+    [SerializeField] private TextMesh text;
+
     public Vector2 lastPosition
     {
         get => positions.Count == 0 ? (Vector2)transform.position : positions[positions.Count - 1];
     }
 
     private Line line;
-    private List<Vector2> positions = new List<Vector2>();
+    public List<Vector2> positions { get; private set; } = new List<Vector2>();
 
     private void Awake()
     {
@@ -19,31 +21,20 @@ public class Node : MonoBehaviour
         ResetPositions();
     }
 
-    private void Update()
+    private void UpdateText()
     {
-        if (isDragging)
-        {
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            var pos = new List<Vector2>(positions);
-            pos.Add(mousePos);
-            line.SetPositions(pos.ToArray());
-        }
+        text.text = (maxPositions - positions.Count +1).ToString();
     }
 
-    public void BeginDrag()
+    public void Drag(Vector2 position)
     {
-        isDragging = true;
-    }
-
-    public void ApplyDrag(Vector2 position)
-    {
-        isDragging = false;
-        AddPoint(position);
+        var pos = new List<Vector2>(positions);
+        pos.Add(position);
+        line.SetPositions(pos.ToArray());
     }
 
     public void CancelDrag()
     {
-        isDragging = false;
         line.SetPositions(positions.ToArray());
     }
 
@@ -51,6 +42,7 @@ public class Node : MonoBehaviour
     {
         positions.Add(position);
         line.SetPositions(positions.ToArray());
+        UpdateText();
     }
 
     [ContextMenu("Reset")]
@@ -59,5 +51,11 @@ public class Node : MonoBehaviour
         positions.Clear();
         positions.Add(transform.position);
         line.SetPositions(positions.ToArray());
+        UpdateText();
     }
+
+    // public void SetColor(Color)
+    // {
+
+    // }
 }
