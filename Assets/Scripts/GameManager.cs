@@ -20,6 +20,13 @@ public class GameManager : MonoBehaviour
             var node = Instantiate(nodePrefab, position, Quaternion.identity);
             gridElements.AddElement(node, x, 5);
         }
+
+        for (int x = 0; x < 4; x++)
+        {
+            var position = grid.GetCellPosition(x, 2);
+            var connection = Instantiate(connectionPrefab, position, Quaternion.identity);
+            gridElements.AddElement(connection, x, 2);
+        }
     }
 
     private void Update()
@@ -38,7 +45,8 @@ public class GameManager : MonoBehaviour
 
     private void Drag()
     {
-        if (draggingNode.positions.Count > draggingNode.maxPositions)
+        //return if has achieved the max num of positions or already is connected
+        if (draggingNode.positions.Count > draggingNode.maxPositions || draggingNode.connection)
             return;
 
         var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -47,21 +55,32 @@ public class GameManager : MonoBehaviour
         int x, y = 0;
         if (grid.GetCellAtPosition(mousePos, out x, out y))
         {
-            //check if cell is empty
-            if (gridElements.elements[x, y] != null)
-                return;
-
-            //previous node position
-            var prev = draggingNode.gridPositions[draggingNode.gridPositions.Count - 1];
-
-            //check if the grid position that the mouse is above is in an orthogonal direction
-            if (Mathf.Abs(prev.x - x) + Mathf.Abs(prev.y - y) <= 1)
+            //check if cell is not a node
+            if (!(gridElements.elements[x, y] is Node))
             {
-                //get the cell center
-                var cellPos = grid.GetCellPosition(x, y);
-                draggingNode.AddPoint(cellPos);
-                gridElements.AddElementPositionOwnership(draggingNode, x, y);
+                //previous node position
+                var prev = draggingNode.gridPositions[draggingNode.gridPositions.Count - 1];
+
+                //check if the grid position that the mouse is above is in an orthogonal direction
+                if (Mathf.Abs(prev.x - x) + Mathf.Abs(prev.y - y) <= 1)
+                {
+                    //get the cell center
+                    var cellPos = grid.GetCellPosition(x, y);
+
+                    //add point (extend line)
+                    draggingNode.AddPoint(cellPos);
+
+                    if (gridElements.elements[x, y] is Connection) //if is a connection connect
+                    {
+                        var connection = (Connection)gridElements.elements[x, y];
+                        connection.Connected = true;
+                        draggingNode.connection = connection;
+                    }
+                    else
+                        gridElements.AddElementPositionOwnership(draggingNode, x, y);
+                }
             }
+
         }
     }
 
@@ -78,6 +97,13 @@ public class GameManager : MonoBehaviour
                 //clear previous movements
                 gridElements.ClearAllAdditionalElementPositions(node);
                 node.ResetPositions();
+
+                //disconnect
+                if (node.connection)
+                {
+                    node.connection.Connected = false;
+                    node.connection = null;
+                }
 
                 draggingNode = node;
             }

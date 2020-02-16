@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Line))]
-public class Node : MonoBehaviour
+public class Node : MonoBehaviour, IGridElement
 {
     [Min(0)] public int maxPositions = 3;
     [SerializeField] private TextMesh text;
@@ -14,6 +14,8 @@ public class Node : MonoBehaviour
 
     private Line line;
     public List<Vector2> positions { get; private set; } = new List<Vector2>();
+    public List<Vector2Int> gridPositions { get; set; }
+    public Connection connection { get; set; }
 
     private void Awake()
     {
