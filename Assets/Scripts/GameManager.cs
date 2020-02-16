@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,21 +14,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        gridElements = grid.GetGridElementsArray();
-
-        for (int x = 0; x < 4; x++)
-        {
-            var position = grid.GetCellPosition(x, 5);
-            var node = Instantiate(nodePrefab, position, Quaternion.identity);
-            gridElements.AddElement(node, x, 5);
-        }
-
-        for (int x = 0; x < 4; x++)
-        {
-            var position = grid.GetCellPosition(x, 2);
-            var connection = Instantiate(connectionPrefab, position, Quaternion.identity);
-            gridElements.AddElement(connection, x, 2);
-        }
+        CreateNewLevel();
     }
 
     private void Update()
@@ -131,14 +118,19 @@ public class GameManager : MonoBehaviour
             {
                 var connection = (Connection)element;
                 if (!connection.Connected)
+                {
                     Debug.Log("not connected", connection);
                     return false;
+                }
             }
             else if (element is Node)
             {
                 var node = (Node)element;
                 if (node.positions.Count <= node.maxPositions)
+                {
+                    Debug.Log("not max positions", node);
                     return false;
+                }
             }
         }
 
@@ -148,5 +140,32 @@ public class GameManager : MonoBehaviour
     private void OnWinGame()
     {
         background.UpdateColor();
+
+        foreach (var el in gridElements.elements)
+        {
+            if(el != null)
+                Destroy(((Component)el).gameObject);
+        }
+
+        CreateNewLevel();
+    }
+
+    private void CreateNewLevel()
+    {
+        gridElements = grid.GetGridElementsArray();
+
+        for (int x = 0; x < 4; x++)
+        {
+            var position = grid.GetCellPosition(x, 5);
+            var node = Instantiate(nodePrefab, position, Quaternion.identity);
+            gridElements.AddElement(node, x, 5);
+        }
+
+        for (int x = 0; x < 4; x++)
+        {
+            var position = grid.GetCellPosition(x, 2);
+            var connection = Instantiate(connectionPrefab, position, Quaternion.identity);
+            gridElements.AddElement(connection, x, 2);
+        }
     }
 }
