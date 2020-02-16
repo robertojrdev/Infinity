@@ -6,6 +6,7 @@ public class Background : MonoBehaviour
 {
     public float transitionTime = .7f;
     public Ease easingFunction = Ease.Linear;
+    public Material overlayMaterial;
     public Gradient[] colors; 
 
     private int index = 0;
@@ -40,8 +41,8 @@ public class Background : MonoBehaviour
 
     private IEnumerator UpdateColorRoutine(Color a, Color b, float time)
     {
-        var initA =  renderer.material.GetColor("_Color");
-        var initB =  renderer.material.GetColor("_Color2");
+        var initA =  renderer.sharedMaterial.GetColor("_Color");
+        var initB =  renderer.sharedMaterial.GetColor("_Color2");
 
         var easeFunc = GetEasingFunction(easingFunction);
 
@@ -50,8 +51,13 @@ public class Background : MonoBehaviour
         {
             var t = Mathf.InverseLerp(0, time, counter);
             t = easeFunc(0, 1, t);
-            renderer.material.SetColor("_Color", Color.Lerp(initA, a, t));
-            renderer.material.SetColor("_Color2", Color.Lerp(initB, b, t));
+            var ca =  Color.Lerp(initA, a, t);
+            var cb =  Color.Lerp(initB, b, t);
+            renderer.sharedMaterial.SetColor("_Color", ca);
+            renderer.sharedMaterial.SetColor("_Color2", cb);
+            
+            overlayMaterial.SetColor("_Color", ca);
+            overlayMaterial.SetColor("_Color2", cb);
 
             counter += Time.deltaTime;
             yield return null;
