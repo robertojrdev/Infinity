@@ -230,6 +230,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   transitionTime: 3
   easingFunction: 20
+  overlayMaterial: {fileID: 2100000, guid: 9d5ad8b07dbe301488ff56700fe67721, type: 2}
   colors:
   - serializedVersion: 2
     key0: {r: 1, g: 0.32911384, b: 0, a: 1}
