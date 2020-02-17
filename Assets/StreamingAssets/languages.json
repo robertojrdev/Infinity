@@ -1,0 +1,17 @@
+{
+    "pt": {
+      "game-name": "NOME DO JOGO",
+      "title-language": "IDIOMA",
+      "title-levels": "NÍVEIS"
+    },
+    "en": {
+      "game-name": "GAME NAME",
+      "title-language": "LANGUAGE",
+      "title-levels": "LEVELS"
+    },
+    "es": {
+      "game-name": "NOME DEL JUEGO",
+      "title-language": "IDIOMA",
+      "title-levels": "NIVELES"
+    }
+  }
