@@ -6,9 +6,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Node nodePrefab;
     [SerializeField] private Connection connectionPrefab;
     [SerializeField] private Background background;
+    [SerializeField] private LevelScriptableFile levelsFile;
 
     private Node draggingNode;
     private GridElementsArray gridElements;
+    private bool gameOn = true;
 
     private void Start()
     {
@@ -17,6 +19,9 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        if(!gameOn)
+            return;
+
         if (Input.GetKeyDown(KeyCode.Space)) //TODO: REMOVE THIS
             OnWinGame();
 
@@ -161,11 +166,27 @@ public class GameManager : MonoBehaviour
     private void CreateNewLevel()
     {
         background.UpdateColor();
-        LevelGenerator.CreateNewLevel(
-            8, 10,
-            nodePrefab, connectionPrefab,
-            grid, ref gridElements
-            );
+        var level = LevelGenerator.CreateNewLevel(8, 10, grid.gridSize);
+        levelsFile.levels.Add(level);
+
+        gridElements = grid.GetGridElementsArray();
+
+
+        for (int i = 0; i < level.nodes.Length; i++)
+        {
+            var pos = level.nodes[i];
+            var position = grid.GetCellPosition(pos.x, pos.y);
+            var node = Instantiate(nodePrefab, position, Quaternion.identity);
+            node.MaxPositions = level.nodesMaxPositions[i];
+            gridElements.AddElement(node, pos.x, pos.y);
+        }
+
+        foreach (var pos in level.connections)
+        {
+            var position = grid.GetCellPosition(pos.x, pos.y);
+            var connection = Instantiate(connectionPrefab, position, Quaternion.identity);
+            gridElements.AddElement(connection, pos.x, pos.y);
+        }
     }
 
 }

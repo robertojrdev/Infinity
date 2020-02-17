@@ -3,19 +3,19 @@ using UnityEngine;
 
 public class LevelGenerator
 {
-    public static void CreateNewLevel(int nodesCount, int nodesSize, Node nodePrefab,
-     Connection connectionPrefab, Grid grid, ref GridElementsArray gridElements)
+    public static Level CreateNewLevel(int nodesCount, int nodesSize, Vector2Int gridSize)
     {
-        gridElements = grid.GetGridElementsArray();
+        var gridElements = new GridElementsArray(gridSize.x, gridSize.y);
 
         //define available positions
-        var gridSize = grid.gridSize.x * grid.gridSize.y;
+        var cellsCount = gridSize.x * gridSize.y;
         List<int> availablePositions = new List<int>();
-        for (int i = 0; i < gridSize; i++)
+        for (int i = 0; i < cellsCount; i++)
             availablePositions.Add(i);
 
         //store nodes to clear their paths
-        var nodes = new List<Node>();
+        var nodes = new List<ElementPrototype>();
+        var connections = new List<ElementPrototype>();
 
         for (int i = 0; i < nodesCount; i++)
         {
@@ -25,9 +25,8 @@ public class LevelGenerator
             availablePositions.RemoveAt(nodeIndex);
 
             //create new node
-            var (x, y) = grid.IndexToPosition(nodePositionIndex);
-            var position = grid.GetCellPosition(x, y);
-            var node = GameObject.Instantiate(nodePrefab, position, Quaternion.identity);
+            var (x, y) = Grid.IndexToPosition(nodePositionIndex, gridSize);
+            var node = new ElementPrototype();
             nodes.Add(node);
             node.MaxPositions = nodesSize;
             gridElements.AddElement(node, x, y);
@@ -47,7 +46,7 @@ public class LevelGenerator
 
                     //check if direction is available
                     var (nx, ny) = (prevX + dir.x, prevY + dir.y);
-                    foundValidPosition = CheckPosition(nx, ny, grid, ref gridElements);
+                    foundValidPosition = CheckPosition(nx, ny, gridSize, ref gridElements);
 
                     //if position is not available try the next
                     if (!foundValidPosition)
@@ -57,7 +56,7 @@ public class LevelGenerator
 
                     //mark position as taken, update previous position and continue looking for the next position
                     gridElements.AddElementPositionOwnership(node, nx, ny);
-                    var index = grid.PositionToIndex(nx, ny);
+                    var index = Grid.PositionToIndex(nx, ny, gridSize);
                     availablePositions.Remove(index);
                     (prevX, prevY) = (nx, ny);
                     break;
@@ -70,18 +69,17 @@ public class LevelGenerator
                     {
                         gridElements.RemoveElement(node);
                         nodes.Remove(node);
-                        GameObject.Destroy(node.gameObject);
                     }
                     else //if still could manage to create some path use it...
                     {
                         node.MaxPositions = j;
                         gridElements.RemoveElementPositionOwnership(node, prevX, prevY);
 
-                        var connectionPosition = grid.GetCellPosition(prevX, prevY);
-                        var connection = GameObject.Instantiate(connectionPrefab, connectionPosition, Quaternion.identity);
+                        var connection = new ElementPrototype();
+                        connections.Add(connection);
                         gridElements.AddElement(connection, prevX, prevY);
 
-                        var index = grid.PositionToIndex(prevX, prevY);
+                        var index = Grid.PositionToIndex(prevX, prevY, gridSize);
                         availablePositions.Remove(index);
                     }
                     break;
@@ -92,28 +90,24 @@ public class LevelGenerator
                 {
                     gridElements.RemoveElementPositionOwnership(node, prevX, prevY);
 
-                    var connectionPosition = grid.GetCellPosition(prevX, prevY);
-                    var connection = GameObject.Instantiate(connectionPrefab, connectionPosition, Quaternion.identity);
+                    var connection = new ElementPrototype();
+                    connections.Add(connection);
                     gridElements.AddElement(connection, prevX, prevY);
 
-                    var index = grid.PositionToIndex(prevX, prevY);
+                    var index = Grid.PositionToIndex(prevX, prevY, gridSize);
                     availablePositions.Remove(index);
                 }
             }
         }
 
-        //clear paths
-        foreach (var n in nodes)
-        {
-            gridElements.ClearAllAdditionalElementPositions(n);
-        }
+        return new Level(nodes.ToArray(), connections.ToArray());
     }
 
-    private static bool CheckPosition(int nx, int ny, Grid grid, ref GridElementsArray gridElements)
+    private static bool CheckPosition(int nx, int ny, Vector2Int gridSize, ref GridElementsArray gridElements)
     {
         //if is outside grid bounds continue
-        if (nx >= grid.gridSize.x || nx < 0 ||
-            ny >= grid.gridSize.y || ny < 0)
+        if (nx >= gridSize.x || nx < 0 ||
+            ny >= gridSize.y || ny < 0)
         {
             return false;
         }

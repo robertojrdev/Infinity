@@ -114,4 +114,18 @@ public class Grid : MonoBehaviour
         return new GridElementsArray(gridSize.x, gridSize.y);
     }
 
+
+    public static int PositionToIndex(int x, int y, Vector2Int gridSize)
+    {
+        return y * gridSize.x + x;
+    }
+
+    
+    public static (int, int) IndexToPosition(int i, Vector2Int gridSize)
+    {
+        var y = (i / gridSize.x);
+        var x =  i - (y * gridSize.x);
+
+        return (x, y);
+    }
 }
