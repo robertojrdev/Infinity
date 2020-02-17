@@ -4,10 +4,10 @@ using System;
 
 public class AdsManager : MonoBehaviour
 {
-    public Action onCloseInterstitial;
+    public static bool isInterstitialVisible = false;
 
-    private BannerView banner;
-    private InterstitialAd interstitial;
+    private static BannerView banner;
+    private static InterstitialAd interstitial;
 
 
     private void OnEnable()
@@ -35,7 +35,7 @@ public class AdsManager : MonoBehaviour
 
 
         banner.OnAdLoaded += OnLoadBanner;
-        banner.OnAdFailedToLoad+= OnFailedToLoadBanner;
+        banner.OnAdFailedToLoad += OnFailedToLoadBanner;
 
 
         //real
@@ -60,8 +60,8 @@ public class AdsManager : MonoBehaviour
 #endif
 
         interstitial = new InterstitialAd(adUnitId);
-        
-        interstitial.OnAdLoaded += OnLoadInterstitial;
+
+        // interstitial.OnAdLoaded += OnLoadInterstitial;
         interstitial.OnAdClosed += OnFinishInterstitial;
         interstitial.OnAdFailedToLoad += OnFailedToLoadInterstitial;
 
@@ -81,29 +81,29 @@ public class AdsManager : MonoBehaviour
         banner.Show();
     }
 
-    private void DisplayInterstitial()
+    public static void DisplayInterstitial()
     {
-        if(interstitial.IsLoaded())
+#if UNITY_STANDALONE
+        //dont show in desktops
+        return;
+#endif
+        if (interstitial.IsLoaded())
+        {
             interstitial.Show();
+            isInterstitialVisible = true;
+        }
     }
-
 
     private void OnLoadBanner(object sender, EventArgs args)
     {
         print("banner display");
-        DisplayBanner();
-    }
-
-    private void OnLoadInterstitial(object sender, EventArgs args)
-    {
-        print("Loaded interstitial");
-        DisplayInterstitial();
+        DisplayBanner(); //display when available
     }
 
     private void OnFinishInterstitial(object sender, EventArgs args)
     {
-        if(onCloseInterstitial != null)
-            onCloseInterstitial.Invoke();
+        isInterstitialVisible = false;
+        RequestInterstitial(); //prepare a new add
     }
 
     private void OnFailedToLoadBanner(object sender, EventArgs args)
@@ -118,5 +118,5 @@ public class AdsManager : MonoBehaviour
         RequestInterstitial();
     }
 
-    
+
 }

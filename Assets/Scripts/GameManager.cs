@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class GameManager : MonoBehaviour
     private bool gameOn = false;
     private Vector2Int currentLevel;
     private Transform objectsHolder;
+    private float lastInterstitialTime = 0;
 
 
     public static Vector2Int CurrentLevel { get => instance.currentLevel; private set => instance.currentLevel = value; }
@@ -207,8 +209,7 @@ public class GameManager : MonoBehaviour
         if(previousLevel.x != CurrentLevel.x)
             background.UpdateColor();
 
-
-        PlayCurrentLevel();
+        StartCoroutine(ShowAddAndStartLevel());
     }
 
     private void ClearCurrentGame()
@@ -223,16 +224,31 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private IEnumerator ShowAddAndStartLevel()
+    {
+        if(Time.time > lastInterstitialTime + 60)
+        {
+            lastInterstitialTime = Time.time;
+            gameOn = false;
+
+            AdsManager.DisplayInterstitial();
+            yield return new WaitWhile(() => AdsManager.isInterstitialVisible);
+
+            gameOn = true;
+        }
+
+        PlayCurrentLevel();
+    }
+
     private void PlayCurrentLevel()
     {
         Level level;
 
         if (levelsFile.HasLevel(CurrentLevel))
             level = levelsFile.levels[CurrentLevel.x].Levels[CurrentLevel.y];
-        else
-            return;
-
-        // var level = LevelGenerator.CreateNewLevel(8, 10, grid.gridSize);
+        else //create a procedural game if has no more levels
+            level = LevelGenerator.CreateNewLevel(8, 10, grid.gridSize);
+            
 
         InstantiateLevel(level);
     }

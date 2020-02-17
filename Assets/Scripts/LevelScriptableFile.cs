@@ -13,6 +13,10 @@ public class LevelScriptableFile : ScriptableObject
 
         next = current;
         next.y++;
+
+        if(next.x >= levels.Count)
+            return false;
+
         if(next.y >= levels[current.x].Levels.Count) //if current package has no more level try to get the next
         {
             next.x++;
