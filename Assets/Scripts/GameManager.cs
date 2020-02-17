@@ -65,17 +65,27 @@ public class GameManager : MonoBehaviour
                     //get the cell center
                     var cellPos = grid.GetCellPosition(x, y);
 
-                    //add point (extend line)
-                    draggingNode.AddPoint(cellPos);
 
                     if (gridElements.elements[x, y] is Connection) //if is a connection connect
                     {
+                        //connect
                         var connection = (Connection)gridElements.elements[x, y];
+
+                        if(connection.Connected) //if already has a connection don't connect
+                            return;
+
                         connection.Connected = true;
                         draggingNode.connection = connection;
+
+                        //add point (extend line)
+                        draggingNode.AddPoint(cellPos);
                     }
                     else
+                    {
+                        //add point (extend line)
+                        draggingNode.AddPoint(cellPos);
                         gridElements.AddElementPositionOwnership(draggingNode, x, y);
+                    }
                 }
             }
 
