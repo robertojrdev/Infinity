@@ -20,14 +20,18 @@ public class GameManager : MonoBehaviour
     private Node draggingNode;
     private GridElementsArray gridElements;
     private bool gameOn = false;
-    private Vector2Int currentLevel;
     private Transform objectsHolder;
     private float lastInterstitialTime = 0;
+    private GameState gameState;
 
 
-    public static Vector2Int CurrentLevel { get => instance.currentLevel; private set => instance.currentLevel = value; }
+    public static Vector2Int CurrentLevel
+    {
+        get => instance.gameState.currentLevel;
+        private set => instance.gameState.currentLevel = value;
+    }
     public static LevelScriptableFile LevelsFile { get => instance.levelsFile; set => instance.levelsFile = value; }
-
+    public static GameState GameState { get => instance.gameState; }
 
     private void Awake()
     {
@@ -46,6 +50,7 @@ public class GameManager : MonoBehaviour
         background.UpdateColor();
 
         SetCamera();
+        gameState = GameState.LoadOrDefault();
         PlayCurrentLevel();
     }
 
@@ -78,8 +83,8 @@ public class GameManager : MonoBehaviour
     private void SetCamera()
     {
         var camera = Camera.main;
-        var minPos = grid.GetCellPosition(0,0);
-        var maxPos = grid.GetCellPosition(grid.gridSize.x,grid.gridSize.y);
+        var minPos = grid.GetCellPosition(0, 0);
+        var maxPos = grid.GetCellPosition(grid.gridSize.x, grid.gridSize.y);
 
         minPos -= Vector2.one * grid.cellsSize * cameraGridOffset;
         minPos -= Vector2.up * grid.cellsSize * cameraGridOffsetDown;
@@ -205,11 +210,14 @@ public class GameManager : MonoBehaviour
     private void OnWinGame()
     {
         onWinGame.Invoke();
-        ClearCurrentGame();
-        var previousLevel = currentLevel;
-        levelsFile.GetNextLevel(CurrentLevel, ref currentLevel);
 
-        if(previousLevel.x != CurrentLevel.x)
+        ClearCurrentGame();
+        var previousLevel = CurrentLevel;
+        levelsFile.GetNextLevel(CurrentLevel, ref gameState.currentLevel);
+
+        gameState.SaveGame();
+
+        if (previousLevel.x != CurrentLevel.x)
             background.UpdateColor();
 
         StartCoroutine(ShowAddAndStartLevel());
@@ -229,7 +237,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator ShowAddAndStartLevel()
     {
-        if(Time.time > lastInterstitialTime + 60)
+        if (Time.time > lastInterstitialTime + 60)
         {
             lastInterstitialTime = Time.time;
             gameOn = false;
@@ -251,7 +259,7 @@ public class GameManager : MonoBehaviour
             level = levelsFile.levels[CurrentLevel.x].Levels[CurrentLevel.y];
         else //create a procedural game if has no more levels
             level = LevelGenerator.CreateNewLevel(8, 10, grid.gridSize);
-            
+
 
         InstantiateLevel(level);
     }
@@ -313,7 +321,7 @@ public class GameManager : MonoBehaviour
         {
             timer += Time.deltaTime;
             var t = Mathf.InverseLerp(0, time, timer);
-            t = Easing.EaseOutQuad(0,1,t);
+            t = Easing.EaseOutQuad(0, 1, t);
             objectsHolder.transform.localScale = Vector3.Lerp(from, to, t);
             yield return null;
         }

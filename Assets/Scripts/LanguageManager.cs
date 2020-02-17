@@ -11,11 +11,9 @@ public class LanguageManager : MonoBehaviour
 
     public static Dictionary<string, Dictionary<string, string>> values =
         new Dictionary<string, Dictionary<string, string>>();
-    public static string currentLanguage {get; private set;} = "en";
     public static Action onUpdate;
 
     [SerializeField] private TextAsset languageJSON;
-    [SerializeField] private string defaltLanguage = "en";
 
     private void Awake()
     {
@@ -28,8 +26,12 @@ public class LanguageManager : MonoBehaviour
             return;
         }
 
-        currentLanguage = defaltLanguage;
         LoadLanguages();
+    }
+
+    private void Start()
+    {
+        SetLanguage(GameManager.GameState.selectedLanguage);
     }
 
     private void LoadLanguages()
@@ -38,48 +40,47 @@ public class LanguageManager : MonoBehaviour
             .DeserializeObject<Dictionary<string, Dictionary<string, string>>>(
                 languageJSON.ToString());
 
-        print("Loaded languages");
-
-        if(onUpdate != null)
+        if (onUpdate != null)
             onUpdate.Invoke();
     }
 
     public static void SetLanguage(string lang)
     {
-        if(values == null)
+        if (values == null)
         {
             Debug.LogError("Languages not loaded");
             return;
         }
 
-        if(!values.ContainsKey(lang))
+        if (!values.ContainsKey(lang))
         {
             Debug.LogError("Language '" + lang + "' not found");
             return;
         }
 
-        currentLanguage = lang;
-        
+        GameManager.GameState.selectedLanguage = lang;
+        GameManager.GameState.SaveGame();
+
         print("Language changed");
-        
-        if(onUpdate != null)
+
+        if (onUpdate != null)
             onUpdate.Invoke();
     }
 
     public static string GetString(string id)
     {
-        if(values == null)
+        if (values == null)
         {
             Debug.LogError("Languages not loaded");
             return "<>";
         }
 
-        if(!values[currentLanguage].ContainsKey(id))
+        if (!values[GameManager.GameState.selectedLanguage].ContainsKey(id))
         {
-            Debug.LogWarning("string '" + id + "' not found in current language (" + currentLanguage +")");
+            Debug.LogWarning("string '" + id + "' not found in current language (" + GameManager.GameState.selectedLanguage + ")");
             return "<>";
         }
 
-        return values[currentLanguage][id];
+        return values[GameManager.GameState.selectedLanguage][id];
     }
 }
