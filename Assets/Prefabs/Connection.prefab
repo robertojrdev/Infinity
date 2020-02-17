@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3542187124391411938}
   - component: {fileID: 4264555046056056569}
+  - component: {fileID: 8991185081105094052}
   m_Layer: 0
   m_Name: Connection
   m_TagString: Untagged
@@ -48,6 +49,25 @@ MonoBehaviour:
   defaltSprite: {fileID: 21300000, guid: ee9707fa6920fbb4ba0d250d7833cceb, type: 3}
   connectedSprite: {fileID: 21300000, guid: 46b145a4b50ca9945a2e4285fc3e556b, type: 3}
   spriteRenderer: {fileID: 6378544015628559529}
+--- !u!95 &8991185081105094052
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3542187124391411937}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 3e7661dbabbbc7741a02de426e2b95ae, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &4418439283696185684
 GameObject:
   m_ObjectHideFlags: 0
@@ -74,7 +94,7 @@ Transform:
   m_GameObject: {fileID: 4418439283696185684}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.205}
-  m_LocalScale: {x: 0.0742, y: 0.0742, z: 0.106}
+  m_LocalScale: {x: 0.096403204, y: 0.096403204, z: 0.13771887}
   m_Children: []
   m_Father: {fileID: 3542187124391411938}
   m_RootOrder: 1

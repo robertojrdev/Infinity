@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using System.Collections;
 
 public class GameManager : MonoBehaviour
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private MenuManager menuManager;
     public float cameraGridOffset = 0.5f;
     public float cameraGridOffsetDown = 2f;
+    public UnityEvent onWinGame;
 
 
     private Node draggingNode;
@@ -202,6 +204,7 @@ public class GameManager : MonoBehaviour
     [ContextMenu("Win game")]
     private void OnWinGame()
     {
+        onWinGame.Invoke();
         ClearCurrentGame();
         var previousLevel = currentLevel;
         levelsFile.GetNextLevel(CurrentLevel, ref currentLevel);
@@ -255,7 +258,7 @@ public class GameManager : MonoBehaviour
 
     private void InstantiateLevel(Level level)
     {
-        objectsHolder.transform.localScale = Vector3.one;
+        StartCoroutine(ZoomGame(false));
         gridElements = grid.GetGridElementsArray();
 
         for (int i = 0; i < level.nodes.Length; i++)
@@ -288,14 +291,33 @@ public class GameManager : MonoBehaviour
     public void PauseGame()
     {
         gameOn = false;
-        objectsHolder.transform.localScale = Vector3.one * 0.7f;
+        StartCoroutine(ZoomGame(true));
         menuManager.OpenMenu();
     }
 
     public void ResumeGame()
     {
         gameOn = true;
-        objectsHolder.transform.localScale = Vector3.one;
+        StartCoroutine(ZoomGame(false));
         menuManager.CloseMenus();
+    }
+
+    IEnumerator ZoomGame(bool zoom)
+    {
+        var from = objectsHolder.localScale;
+        var to = zoom ? Vector3.one * 0.7f : Vector3.one;
+
+        float timer = 0;
+        float time = 0.25f;
+        while (timer <= time)
+        {
+            timer += Time.deltaTime;
+            var t = Mathf.InverseLerp(0, time, timer);
+            t = Easing.EaseOutQuad(0,1,t);
+            objectsHolder.transform.localScale = Vector3.Lerp(from, to, t);
+            yield return null;
+        }
+
+        objectsHolder.transform.localScale = to;
     }
 }
