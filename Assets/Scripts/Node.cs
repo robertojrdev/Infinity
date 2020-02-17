@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(Line))]
 public class Node : MonoBehaviour, IGridElement
 {
-    [Min(0)] public int maxPositions = 3;
+    [Min(0), SerializeField] private int maxPositions = 3;
     [SerializeField] private TextMesh text;
 
     public Vector2 lastPosition
@@ -16,6 +16,7 @@ public class Node : MonoBehaviour, IGridElement
     public List<Vector2> positions { get; private set; } = new List<Vector2>();
     public List<Vector2Int> gridPositions { get; set; }
     public Connection connection { get; set; }
+    public int MaxPositions { get => maxPositions; set { maxPositions = value; UpdateText(); } }
 
     private void Awake()
     {
@@ -25,7 +26,7 @@ public class Node : MonoBehaviour, IGridElement
 
     private void UpdateText()
     {
-        text.text = (maxPositions - positions.Count +1).ToString();
+        text.text = (MaxPositions - positions.Count + 1).ToString();
     }
 
     public void Drag(Vector2 position)

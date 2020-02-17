@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,6 +20,9 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Space)) //TODO: REMOVE THIS
+            OnWinGame();
+
         if (Input.GetMouseButtonDown(0))
             TryStartDrag();
 
@@ -40,7 +44,7 @@ public class GameManager : MonoBehaviour
     private void Drag()
     {
         //return if has achieved the max num of positions or already is connected
-        if (draggingNode.positions.Count > draggingNode.maxPositions || draggingNode.connection)
+        if (draggingNode.positions.Count > draggingNode.MaxPositions || draggingNode.connection)
             return;
 
         var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -119,16 +123,14 @@ public class GameManager : MonoBehaviour
                 var connection = (Connection)element;
                 if (!connection.Connected)
                 {
-                    Debug.Log("not connected", connection);
                     return false;
                 }
             }
             else if (element is Node)
             {
                 var node = (Node)element;
-                if (node.positions.Count <= node.maxPositions)
+                if (node.positions.Count <= node.MaxPositions)
                 {
-                    Debug.Log("not max positions", node);
                     return false;
                 }
             }
@@ -137,13 +139,12 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    [ContextMenu("Win game")]
     private void OnWinGame()
     {
-        background.UpdateColor();
-
         foreach (var el in gridElements.elements)
         {
-            if(el != null)
+            if (el != null)
                 Destroy(((Component)el).gameObject);
         }
 
@@ -152,20 +153,12 @@ public class GameManager : MonoBehaviour
 
     private void CreateNewLevel()
     {
-        gridElements = grid.GetGridElementsArray();
-
-        for (int x = 0; x < 4; x++)
-        {
-            var position = grid.GetCellPosition(x, 5);
-            var node = Instantiate(nodePrefab, position, Quaternion.identity);
-            gridElements.AddElement(node, x, 5);
-        }
-
-        for (int x = 0; x < 4; x++)
-        {
-            var position = grid.GetCellPosition(x, 2);
-            var connection = Instantiate(connectionPrefab, position, Quaternion.identity);
-            gridElements.AddElement(connection, x, 2);
-        }
+        background.UpdateColor();
+        LevelGenerator.CreateNewLevel(
+            8, 10,
+            nodePrefab, connectionPrefab,
+            grid, ref gridElements
+            );
     }
+
 }

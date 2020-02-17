@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public struct GridElementsArray
 {
     public IGridElement[,] elements;
@@ -12,6 +13,12 @@ public struct GridElementsArray
 
     public void AddElement(IGridElement element, int x, int y)
     {
+        if(elements[x, y] != null)
+        {
+            Debug.LogWarning("The position " + x + ", " + y + " is already taken");
+            return;
+        }
+
         elements[x, y] = element;
         element.gridPositions = new List<Vector2Int>();
         element.gridPositions.Add(new Vector2Int(x, y));
