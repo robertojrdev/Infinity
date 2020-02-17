@@ -45,6 +45,9 @@ public class MenuManager : MonoBehaviour
         var previous = currentLevelPack;
         currentLevelPack += increase ? 1 : -1;
         currentLevelPack = Mathf.Clamp(currentLevelPack, 0, GameManager.LevelsFile.levels.Count);
+
+        levelPackText.text = (currentLevelPack + 1).ToString();
+
         print(increase + " - " + previous + "/" + currentLevelPack);
         if (currentLevelPack != previous)
             LoadLevelsButtons(currentLevelPack);
