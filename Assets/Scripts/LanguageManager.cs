@@ -8,13 +8,13 @@ public class LanguageManager : MonoBehaviour
 {
     public static LanguageManager instance { get; private set; }
 
-    const string FILE_NAME = "languages.json";
 
     public static Dictionary<string, Dictionary<string, string>> values =
         new Dictionary<string, Dictionary<string, string>>();
     public static string currentLanguage {get; private set;} = "en";
     public static Action onUpdate;
 
+    [SerializeField] private TextAsset languageJSON;
     [SerializeField] private string defaltLanguage = "en";
 
     private void Awake()
@@ -34,16 +34,9 @@ public class LanguageManager : MonoBehaviour
 
     private void LoadLanguages()
     {
-        var path = Application.streamingAssetsPath + @"/languages.json";
-        if (!File.Exists(path))
-        {
-            Debug.LogError("Could not find " + FILE_NAME + " at path:" + path);
-            return;
-        }
-
-        var json = File.ReadAllText(path);
-        print(json);
-        values = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(json);
+        values = JsonConvert
+            .DeserializeObject<Dictionary<string, Dictionary<string, string>>>(
+                languageJSON.ToString());
 
         print("Loaded languages");
 

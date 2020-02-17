@@ -21,7 +21,7 @@ public class Line : MonoBehaviour
     private void Awake()
     {
         meshFilter.mesh = new Mesh();
-        inputPosition = new Vector2[] {transform.position};
+        inputPosition = new Vector2[] { transform.position };
     }
 
     public void SetPositions(Vector2[] positions, bool transformToLocalPos = true)
@@ -31,18 +31,18 @@ public class Line : MonoBehaviour
         triangles = new int[(vertices.Length - 2) * 3];
 
         //transform to local position
-        if(transformToLocalPos)
+        if (transformToLocalPos)
         {
             var matrix = transform.worldToLocalMatrix;
             for (int i = 0; i < positions.Length; i++)
                 positions[i] = matrix.MultiplyPoint(positions[i]);
         }
 
-        for (int i = 0; i < positions.Length -1; i++)
+        for (int i = 0; i < positions.Length - 1; i++)
         {
             var line = (positions[i + 1] - positions[i]).normalized;
             var normal = new Vector2(-line.y, line.x);
-            
+
             var vi = i * 4; //vertice index
             vertices[vi + 0] = positions[i] - normal * thickness;
             vertices[vi + 1] = positions[i] + normal * thickness;
@@ -58,7 +58,7 @@ public class Line : MonoBehaviour
             triangles[ti + 5] = vi + 3;
         }
 
-        if(connect)
+        if (connect)
             AddCircles();
 
         meshFilter.mesh.Clear();
@@ -80,7 +80,7 @@ public class Line : MonoBehaviour
         //add circles vertices to mesh vertices
         var origVertCount = vertices.Length;
         Array.Resize(ref vertices, vertices.Length + circlesCount * circleVertCount);
-    
+
         var vertIndex = origVertCount;
         for (int i = 0; i < circlesCount; i++)
         {
@@ -118,16 +118,16 @@ public class Line : MonoBehaviour
             positions[i + 1] = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * radius;
         }
 
-        positions[circleResolution +1] = positions[1]; //connect the end
+        positions[circleResolution + 1] = positions[1]; //connect the end
         return positions;
     }
 
     private int[] GetTrianglesFromCircle(int startindex, int vertices)
     {
-        var tris = new int[(vertices -1) * 3];
-        for (int i = 1; i < vertices -1; i++)
+        var tris = new int[(vertices - 1) * 3];
+        for (int i = 1; i < vertices - 1; i++)
         {
-            var ti = (i -1) * 3;
+            var ti = (i - 1) * 3;
             tris[ti] = 0 + startindex;
             tris[ti + 1] = i + startindex;
             tris[ti + 2] = i + 1 + startindex;
@@ -145,6 +145,7 @@ public class Line : MonoBehaviour
         return nCircle;
     }
 
+#if UNITY_EDITOR
     private void Reset()
     {
         meshRenderer = GetComponent<MeshRenderer>();
@@ -152,7 +153,8 @@ public class Line : MonoBehaviour
         var material = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Line.mat");
         material.SetTexture("tex", Texture2D.whiteTexture);
         meshRenderer.material = material;
-        
+
         inputPosition = new Vector2[] { transform.position };
     }
+#endif
 }

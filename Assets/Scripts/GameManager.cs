@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Background background;
     [SerializeField] private LevelScriptableFile levelsFile;
     [SerializeField] private MenuManager menuManager;
+    public float cameraGridOffset = 0.5f;
+    public float cameraGridOffsetDown = 2f;
 
 
     private Node draggingNode;
@@ -37,6 +39,9 @@ public class GameManager : MonoBehaviour
         objectsHolder = new GameObject("Grid Holder").transform;
         objectsHolder.position = Vector3.zero;
 
+        background.UpdateColor();
+
+        SetCamera();
         PlayCurrentLevel();
     }
 
@@ -64,6 +69,24 @@ public class GameManager : MonoBehaviour
             if (won)
                 OnWinGame();
         }
+    }
+
+    private void SetCamera()
+    {
+        var camera = Camera.main;
+        var minPos = grid.GetCellPosition(0,0);
+        var maxPos = grid.GetCellPosition(grid.gridSize.x,grid.gridSize.y);
+
+        minPos -= Vector2.one * grid.cellsSize * cameraGridOffset;
+        minPos -= Vector2.up * grid.cellsSize * cameraGridOffsetDown;
+        maxPos += Vector2.one * grid.cellsSize * cameraGridOffset;
+
+        var size = (maxPos - minPos);
+        var center = Vector2.down * grid.cellsSize * (cameraGridOffsetDown / 2);
+
+        var bounds = new Bounds(center, size);
+
+        CameraBounds.Bound(bounds, camera);
     }
 
     private void Drag()
@@ -178,7 +201,13 @@ public class GameManager : MonoBehaviour
     private void OnWinGame()
     {
         ClearCurrentGame();
+        var previousLevel = currentLevel;
         levelsFile.GetNextLevel(CurrentLevel, ref currentLevel);
+
+        if(previousLevel.x != CurrentLevel.x)
+            background.UpdateColor();
+
+
         PlayCurrentLevel();
     }
 
@@ -196,8 +225,6 @@ public class GameManager : MonoBehaviour
 
     private void PlayCurrentLevel()
     {
-        background.UpdateColor();
-
         Level level;
 
         if (levelsFile.HasLevel(CurrentLevel))
