@@ -2,25 +2,47 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance { get; private set; }
+
     [SerializeField] private Grid grid;
     [SerializeField] private Node nodePrefab;
     [SerializeField] private Connection connectionPrefab;
     [SerializeField] private Background background;
     [SerializeField] private LevelScriptableFile levelsFile;
+    [SerializeField] private MenuManager menuManager;
+
 
     private Node draggingNode;
     private GridElementsArray gridElements;
-    private bool gameOn = true;
+    private bool gameOn = false;
     private Vector2Int currentLevel;
+    private Transform objectsHolder;
 
-    private void Start()
+
+    public static Vector2Int CurrentLevel { get => instance.currentLevel; private set => instance.currentLevel = value; }
+    public static LevelScriptableFile LevelsFile { get => instance.levelsFile; set => instance.levelsFile = value; }
+
+
+    private void Awake()
     {
-        NextLevel();
+        if (!instance)
+            instance = this;
+        else
+        {
+            Debug.LogWarning("Multiple GameManagers not allowed", gameObject);
+            Destroy(this);
+            return;
+        }
+
+        objectsHolder = new GameObject("Grid Holder").transform;
+        objectsHolder.position = Vector3.zero;
+
+        PlayCurrentLevel();
     }
 
     private void Update()
     {
-        if(!gameOn)
+        if (!gameOn)
             return;
 
         if (Input.GetKeyDown(KeyCode.Space)) //TODO: REMOVE THIS
@@ -74,7 +96,7 @@ public class GameManager : MonoBehaviour
                         //connect
                         var connection = (Connection)gridElements.elements[x, y];
 
-                        if(connection.Connected) //if already has a connection don't connect
+                        if (connection.Connected) //if already has a connection don't connect
                             return;
 
                         connection.Connected = true;
@@ -155,37 +177,49 @@ public class GameManager : MonoBehaviour
     [ContextMenu("Win game")]
     private void OnWinGame()
     {
+        ClearCurrentGame();
+        levelsFile.GetNextLevel(CurrentLevel, ref currentLevel);
+        PlayCurrentLevel();
+    }
+
+    private void ClearCurrentGame()
+    {
+        if (gridElements.elements == null)
+            return;
+
         foreach (var el in gridElements.elements)
         {
             if (el != null)
                 Destroy(((Component)el).gameObject);
         }
-
-        levelsFile.GetNextLevel(currentLevel, ref currentLevel);
-
-        NextLevel();
     }
 
-    private void NextLevel()
+    private void PlayCurrentLevel()
     {
         background.UpdateColor();
 
         Level level;
-        
-        if(levelsFile.HasLevel(currentLevel))
-            level = levelsFile.levels[currentLevel.x].Levels[currentLevel.y];
+
+        if (levelsFile.HasLevel(CurrentLevel))
+            level = levelsFile.levels[CurrentLevel.x].Levels[CurrentLevel.y];
         else
             return;
 
         // var level = LevelGenerator.CreateNewLevel(8, 10, grid.gridSize);
 
+        InstantiateLevel(level);
+    }
+
+    private void InstantiateLevel(Level level)
+    {
+        objectsHolder.transform.localScale = Vector3.one;
         gridElements = grid.GetGridElementsArray();
 
         for (int i = 0; i < level.nodes.Length; i++)
         {
             var pos = level.nodes[i];
             var position = grid.GetCellPosition(pos.x, pos.y);
-            var node = Instantiate(nodePrefab, position, Quaternion.identity);
+            var node = Instantiate(nodePrefab, position, Quaternion.identity, objectsHolder);
             node.MaxPositions = level.nodesMaxPositions[i];
             gridElements.AddElement(node, pos.x, pos.y);
         }
@@ -193,8 +227,32 @@ public class GameManager : MonoBehaviour
         foreach (var pos in level.connections)
         {
             var position = grid.GetCellPosition(pos.x, pos.y);
-            var connection = Instantiate(connectionPrefab, position, Quaternion.identity);
+            var connection = Instantiate(connectionPrefab, position, Quaternion.identity, objectsHolder);
             gridElements.AddElement(connection, pos.x, pos.y);
         }
+
+        gameOn = true;
+    }
+
+    public static void LoadNewGame(Vector2Int level)
+    {
+        instance.ClearCurrentGame();
+        CurrentLevel = level;
+        var levelFile = LevelsFile.levels[CurrentLevel.x].Levels[CurrentLevel.y];
+        instance.InstantiateLevel(levelFile);
+    }
+
+    public void PauseGame()
+    {
+        gameOn = false;
+        objectsHolder.transform.localScale = Vector3.one * 0.7f;
+        menuManager.OpenMenu();
+    }
+
+    public void ResumeGame()
+    {
+        gameOn = true;
+        objectsHolder.transform.localScale = Vector3.one;
+        menuManager.CloseMenus();
     }
 }
