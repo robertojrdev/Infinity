@@ -11,10 +11,11 @@ public class GameManager : MonoBehaviour
     private Node draggingNode;
     private GridElementsArray gridElements;
     private bool gameOn = true;
+    private Vector2Int currentLevel;
 
     private void Start()
     {
-        CreateNewLevel();
+        NextLevel();
     }
 
     private void Update()
@@ -160,17 +161,25 @@ public class GameManager : MonoBehaviour
                 Destroy(((Component)el).gameObject);
         }
 
-        CreateNewLevel();
+        levelsFile.GetNextLevel(currentLevel, ref currentLevel);
+
+        NextLevel();
     }
 
-    private void CreateNewLevel()
+    private void NextLevel()
     {
         background.UpdateColor();
-        var level = LevelGenerator.CreateNewLevel(8, 10, grid.gridSize);
-        levelsFile.levels.Add(level);
+
+        Level level;
+        
+        if(levelsFile.HasLevel(currentLevel))
+            level = levelsFile.levels[currentLevel.x].Levels[currentLevel.y];
+        else
+            return;
+
+        // var level = LevelGenerator.CreateNewLevel(8, 10, grid.gridSize);
 
         gridElements = grid.GetGridElementsArray();
-
 
         for (int i = 0; i < level.nodes.Length; i++)
         {
@@ -188,5 +197,4 @@ public class GameManager : MonoBehaviour
             gridElements.AddElement(connection, pos.x, pos.y);
         }
     }
-
 }
