@@ -287,7 +287,8 @@ public class GameManager : MonoBehaviour
         {
             var pos = level.nodes[i];
             var position = grid.GetCellPosition(pos.x, pos.y);
-            var node = Instantiate(nodePrefab, position, Quaternion.identity, objectsHolder);
+            var node = Instantiate(nodePrefab, objectsHolder);
+            node.transform.localPosition = position;
             node.MaxPositions = level.nodesMaxPositions[i];
             gridElements.AddElement(node, pos.x, pos.y);
         }
@@ -295,7 +296,8 @@ public class GameManager : MonoBehaviour
         foreach (var pos in level.connections)
         {
             var position = grid.GetCellPosition(pos.x, pos.y);
-            var connection = Instantiate(connectionPrefab, position, Quaternion.identity, objectsHolder);
+            var connection = Instantiate(connectionPrefab, objectsHolder);
+            connection.transform.localPosition = position;
             gridElements.AddElement(connection, pos.x, pos.y);
         }
 
