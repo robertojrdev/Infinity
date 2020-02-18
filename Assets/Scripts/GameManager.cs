@@ -251,6 +251,7 @@ public class GameManager : MonoBehaviour
     {
         if (Time.time > lastInterstitialTime + 60)
         {
+            print("SHOW ADS");
             lastInterstitialTime = Time.time;
             gameOn = false;
 
@@ -258,8 +259,9 @@ public class GameManager : MonoBehaviour
             yield return new WaitWhile(() => AdsManager.isInterstitialVisible);
 
             gameOn = true;
+            print("CLOSED ADS");
         }
-
+        
         PlayCurrentLevel();
     }
 

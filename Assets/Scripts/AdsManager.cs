@@ -87,6 +87,10 @@ public class AdsManager : MonoBehaviour
         //dont show in desktops
         return;
 #endif
+#if UNITY_EDITOR
+        //dont show in editor too
+        return;
+#endif
         if (interstitial.IsLoaded())
         {
             interstitial.Show();
