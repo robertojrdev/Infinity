@@ -60,7 +60,7 @@ public class MenuManager : MonoBehaviour
     {
         var previous = currentLevelPack;
         currentLevelPack += increase ? 1 : -1;
-        currentLevelPack = Mathf.Clamp(currentLevelPack, 0, GameManager.LevelsFile.levels.Count);
+        currentLevelPack = Mathf.Clamp(currentLevelPack, 0, GameManager.LevelsFile.levels.Count -1);
 
         levelPackText.text = (currentLevelPack + 1).ToString();
 

@@ -40,6 +40,8 @@ public class SFXManager : MonoBehaviour
             return;
         }
 
+        instance.source.Stop();
+        instance.source.time = 0;
         instance.source.pitch = pitch;
         instance.source.volume = volume;
         instance.source.clip = clip;
@@ -61,6 +63,8 @@ public class SFXManager : MonoBehaviour
             return;
         }
 
+        instance.source.Stop();
+        instance.source.time = 0;
         instance.source.pitch = pitch;
         instance.source.volume = volume;
         instance.source.clip = instance.clips[index].clip;
