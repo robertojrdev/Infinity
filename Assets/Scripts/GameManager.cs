@@ -136,12 +136,20 @@ public class GameManager : MonoBehaviour
 
                         //add point (extend line)
                         draggingNode.AddPoint(cellPos);
+
+                        SFXManager.PlayClip("snap2", 0.8f); //sfx
                     }
                     else
                     {
                         //add point (extend line)
                         draggingNode.AddPoint(cellPos);
                         gridElements.AddElementPositionOwnership(draggingNode, x, y);
+
+                        var pitchTime = Mathf.InverseLerp(0, draggingNode.MaxPositions
+                            ,draggingNode.positions.Count);
+                        var pitch = Mathf.Lerp(0.95f, 1.15f, pitchTime);
+                        SFXManager.PlayClip("snap", .8f, pitch); //sfx
+
                     }
                 }
             }
@@ -168,6 +176,8 @@ public class GameManager : MonoBehaviour
                 {
                     node.connection.Connected = false;
                     node.connection = null;
+
+                    SFXManager.PlayClip("snap2", 0.6f, 0.9f); //sfx
                 }
 
                 draggingNode = node;
@@ -219,6 +229,8 @@ public class GameManager : MonoBehaviour
 
         if (previousLevel.x != CurrentLevel.x)
             background.UpdateColor();
+
+        SFXManager.PlayClip("level", 0.9f, Random.Range(.9f,1.1f));
 
         StartCoroutine(ShowAddAndStartLevel());
     }

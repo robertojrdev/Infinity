@@ -26,6 +26,14 @@ public class MenuManager : MonoBehaviour
 
     private void Start()
     {
+        SettupButtons();
+
+        currentLevelPack = GameManager.CurrentLevel.x;
+        LoadLevelsButtons(currentLevelPack);
+    }
+
+    private void SettupButtons()
+    {
         menuButton.onClick.AddListener(GameManager.instance.PauseGame);
         resumeButton.onClick.AddListener(GameManager.instance.ResumeGame);
 
@@ -36,8 +44,16 @@ public class MenuManager : MonoBehaviour
         minusLevelButton.onClick.AddListener(() => ChangeLevelPack(false));
         plusLevelButton.onClick.AddListener(() => ChangeLevelPack(true));
 
-        currentLevelPack = GameManager.CurrentLevel.x;
-        LoadLevelsButtons(currentLevelPack);
+        //ADD SFX
+        menuButton.onClick.AddListener(() => SFXManager.PlayClip("snap", 0.7f));
+        resumeButton.onClick.AddListener(() => SFXManager.PlayClip("snap", 0.7f));
+
+        langButtonPT.onClick.AddListener(() => SFXManager.PlayClip("snap", 0.7f));
+        langButtonEN.onClick.AddListener(() => SFXManager.PlayClip("snap", 0.7f));
+        langButtonES.onClick.AddListener(() => SFXManager.PlayClip("snap", 0.7f));
+
+        minusLevelButton.onClick.AddListener(() => SFXManager.PlayClip("snap", 0.7f));
+        plusLevelButton.onClick.AddListener(() => SFXManager.PlayClip("snap", 0.7f));
     }
 
     private void ChangeLevelPack(bool increase)
